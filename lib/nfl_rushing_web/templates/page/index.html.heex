@@ -1,0 +1,167 @@
+<section class="phx-hero">
+  <h1>Welcome to NFL Rushing!</h1>
+</section>
+
+<section class="row">
+  <div>
+    <div>
+      <label for="name">First name:</label><br>
+      <input type="text" id="name" name="name"><br>
+    </div>
+    <div>
+      <label for="sort_by">Sort by:</label><br>
+      <select name="sort_by" id="sort_by">
+        <option value="yards">Total Rushing Yards</option>
+        <option value="longest_rush">Longest Rush</option>
+        <option value="touchdowns">Total Rushing Touchdowns</option>
+      </select>
+    </div>
+    <div>
+      <label for="order_by">Order by:</label><br>
+      <select name="order_by" id="order_by">
+        <option value="asc">ASC</option>
+        <option value="desc">DESC</option>
+      </select>
+    </div>
+
+    <div><label>Pagination:</label></div>
+
+    <div>
+      <label for="page">Page:</label><br>
+      <input type="text" id="page"><br>
+    </div>
+    <div>
+      <label for="page_size">Page Size:</label><br>
+      <input type="text" id="page_size"><br>
+    </div>
+    <div>
+      <button onclick="search()">Search</button>
+      <button onclick="export_to_csv()">Export to CSV</button>
+    </div>
+  </div>
+</section>
+<section class="row">
+  <article class="column">
+    <div id="div_pagination"></div>
+    <div id="div_pagination1"></div>
+    <div id="div_table"></div>
+  </article>
+</section>
+
+<script>
+    function search() {
+      var query = search_query()
+      const response = fetch('http://localhost:4000/api/v1/players' + query).then(response => response.json()).then(json => createTable(json))
+    }
+
+    function createTable(json) {
+      var players = json.data
+      var meta = json.meta
+      var table = document.createElement("table");
+      table.border = "1";
+
+      var headers = ["Name", "Team", "Position", "Attempts/Game", "Attempts", "Yards", "Yards/Attempt", "Yards/Game", "Touchdowns", "Longest Rush", "Longest Rush TD?", "First Downs", "First Downs %", "20+", "40+", "Fumbles"];
+
+      //Add the header row.
+      var row = table.insertRow(-1);
+      for (var i = 0; i < headers.length; i++) {
+          var headerCell = document.createElement("TH");
+          headerCell.innerHTML = headers[i];
+          row.appendChild(headerCell);
+      }
+
+      //Add the data rows.
+      for (var i = 0; i < players.length; i++) {
+          row = table.insertRow(-1);
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["name"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["team"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["position"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["attempts_per_game_avg"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["attempts"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["yards"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["yards_per_attempt_avg"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["yards_per_game"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["touchdowns"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["longest_rush"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["is_longest_rush_touchdown"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["first_downs"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["first_downs_percentage"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["plus_20_yards"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["plus_40_yards"]
+          var cell = row.insertCell(-1);
+          cell.innerHTML = players[i]["fumbles"]
+      }
+
+      var dvTable = document.getElementById("div_table");
+      dvTable.innerHTML = "";
+      dvTable.appendChild(table);
+
+      var dvPagination = document.getElementById("div_pagination");
+      dvPagination.innerHTML = "";
+      var count = document.createElement("label");
+      count.innerHTML = "Current Page: " + meta.page + " of " + meta.total_pages
+      dvPagination.appendChild(count);
+
+      var dvPagination1 = document.getElementById("div_pagination1");
+      dvPagination1.innerHTML = "";
+      var count = document.createElement("label");
+      count.innerHTML = "Showing " + players.length + " of " + meta.total_entries
+      dvPagination1.appendChild(count);
+    }
+
+    function search_query() {
+      name = document.getElementById('name').value
+      order_by = document.getElementById('order_by').value
+      sort_by = document.getElementById('sort_by').value
+      page = document.getElementById('page').value
+      page_size = document.getElementById('page_size').value
+      var query = '?order_by=' + order_by + '&sort_by=' + sort_by;
+      if (name != '') {
+        query = query + '&name=' + name
+      }
+
+      if (page != '') {
+        query = query + '&page=' + page
+      }
+
+      if (page_size != '') {
+        query = query + '&page_size=' + page_size
+      }
+
+      return query
+    }
+
+    function export_to_csv() {
+      var query = search_query()
+      const response = fetch('http://localhost:4000/api/v1/players' + query, {
+            method: 'GET',
+            headers: {
+                "Accept": "text/csv"
+            }
+          }).then(response => response.blob())
+        .then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = "players.csv";
+            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+            a.click();    
+            a.remove();  //afterwards we remove the element again         
+        });
+    }
+</script>
