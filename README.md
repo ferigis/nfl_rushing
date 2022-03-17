@@ -69,7 +69,7 @@ I added some tests and checks in order to have 100% coverage and making Credo/Di
 $ mix check
 ```
 
-## Installation
+#### Installation
 
 This solution requires having installed (or dockerized) a Postgres up and running in the standard port and localhost, if not we will need to change the config file.
 
@@ -79,22 +79,22 @@ In order to fetch the dependencies
 $ mix deps.get
 ```
 
+If you want to run tests and see the 100% coverage (optional)
+
+```
+$ mix check
+```
+
 In order to create/migrate and fill the DB we will run:
 
 ```
 $ mix ecto.setup
 ```
 
-once the DB is migrated we can create the release of the project running:
+once the DB is migrated we can run the service with this command:
 
 ```
-$ mix release nfl_rushing
-```
-
-Then we can start the server:
-
-```
-$ mix 
+$ iex -S mix phx.server
 ```
 
 Now the service is running at `http://localhost:4000`

@@ -25,10 +25,7 @@ defmodule NFL.Rushing.MixProject do
       ],
 
       # Dialyzer
-      dialyzer: dialyzer(),
-
-      # Releases
-      releases: releases()
+      dialyzer: dialyzer()
     ]
   end
 
@@ -104,15 +101,6 @@ defmodule NFL.Rushing.MixProject do
         :no_opaque,
         :unknown,
         :no_return
-      ]
-    ]
-  end
-
-  defp releases do
-    [
-      nfl_rushing: [
-        include_executables_for: [:unix],
-        applications: [runtime_tools: :permanent]
       ]
     ]
   end
